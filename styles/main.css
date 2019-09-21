@@ -19,6 +19,7 @@ body {
   justify-content: center;
   max-height: 600px;
   max-width: 600px;
+  background-color: black;
 }
 
 .grid div {
@@ -29,11 +30,32 @@ body {
 }
 
 .grid div.player {
-  background-color: black;
+  background-color:yellow;
   border-radius: 100%;
 }
 
 .wall {
-  background-color: blue;
+  background-color:black;
+  border: solid 1px blue 
 }
 
+.pip {
+  background-color: chartreuse;
+  border-radius: 100%;
+}
+
+.inky{
+  background-color: lightblue
+}
+
+.pinky{
+ background-color: pink
+}
+
+.blinky{
+background-color: red
+}
+
+.clyde{
+background-color: orange
+}

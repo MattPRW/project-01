@@ -2,7 +2,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const width = 18
   const grid = document.querySelector('.grid')
 
-
   //========================
   //== Creating the board ==
   //========================
@@ -21,29 +20,98 @@ document.addEventListener('DOMContentLoaded', () => {
       258, 259, 260, 261, 262, 263, 269, 270, 272, 273, 274, 275, 276, 277,
       278, 279, 280, 281, 282, 283, 284, 285, 287, 288, 305, 306, 307, 308,
       309, 310, 311, 312, 313, 314, 315, 316, 317, 318, 319, 320, 321, 322, 323]
-  const cells = []
-  let pacPosition = 289
 
-  //creating the empty grid divs
-  for (let i = 0; i < width ** 2; i++) {
-    const cell = document.createElement('DIV')
-    grid.appendChild(cell)
-    cells.push(cell)
+  const noPipLocations =
+      [19,34,115,116,117,118,144,145,146,147,148,149,150,151,154,155,156,157,
+        158,159,160,161,115,116,117,118,169,170,171,172,133,136,289,151,154,304,205]
+
+  const cells = []
+
+ 
+
+  let pacIntervalId = 0
+  const validKey = [37, 38, 39, 40]
+
+  let leftWall = false
+  let upWall = false
+  let rightWall = false
+  let downWall = false
+  let pacPosition = 205
+  let ghostPositions = {
+    inky: 169,
+    pinky: 170,
+    blinky: 171,
+    clyde: 172
+  }
+  let totalScore = 0
+  let pipsRemaining = 109
+
+  //Building the grid
+  function buildGrid() {
+    for (let i = 0; i < width ** 2; i++) {
+      const cell = document.createElement('DIV')
+      grid.appendChild(cell)
+      cells.push(cell)
+    }
   }
 
   //adding the wall class to the tile divs
-  cells.forEach((element, index) => {
-    if (wallLocations.includes(index))
-      element.classList.add('wall')
-  })
+  function addWalls() {
+    cells.forEach((element, index) => {
+      if (wallLocations.includes(index))
+        element.classList.add('wall')
+    })
+  }
 
+  function addPips() {
+    cells.forEach((element, index) => {
+      //console.log(wallLocations.includes(index))
+      if (!noPipLocations.includes(index) && !wallLocations.includes(index))
+        element.classList.add('pip')
+    })
+  }
+
+  function addGhosts() {
+    cells[ghostPositions.inky].classList.add('inky')
+    cells[ghostPositions.blinky].classList.add('blinky')
+    cells[ghostPositions.pinky].classList.add('pinky')
+    cells[ghostPositions.clyde].classList.add('clyde')
+  }
+
+  function getWalls() {
+    leftWall = (cells[pacPosition - 1].classList.contains('wall'))
+    upWall = (cells[pacPosition - width].classList.contains('wall'))
+    rightWall = (cells[pacPosition + 1].classList.contains('wall'))
+    downWall = (cells[pacPosition + width].classList.contains('wall'))
+  }
+
+  function eatPip() {
+    if (cells[pacPosition].classList.contains('pip')){
+      cells[pacPosition].classList.remove('pip')
+      totalScore += 10
+      pipsRemaining -= 1
+    }
+  }
+
+  function winLose() {
+    console.log(ghostPositions.values)
+    if (pipsRemaining === 0) {
+      console.log('you have won')
+      clearInterval(pacIntervalId)
+    }
+    if (Object.values(ghostPositions).includes(pacPosition)) {
+      console.log('you have lost')
+      clearInterval(pacIntervalId)
+    }
+  }
+
+
+  buildGrid()
+  addWalls()
+  addPips()
+  addGhosts()
   //adding the player on to the grid in starting position
   cells[pacPosition].classList.add('player')
-
-
-  let pacIntervalId = 0
-  let movement = false
-  const validKey = [37, 38, 39, 40]
 
   //==================//
   // Pac-Man movements//
@@ -51,55 +119,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.addEventListener('keyup', (e) => {
     if (validKey.includes(e.keyCode)) {
-      clearInterval(pacIntervalId)
-      pacIntervalId = setInterval(() => {
-        cells[pacPosition].classList.remove('player')
-        const leftWall = (cells[pacPosition - 1].classList.contains('wall') === false)
-        const upWall = (cells[pacPosition - width].classList.contains('wall') === false)
-        const rightWall =  (cells[pacPosition + 1].classList.contains('wall') === false)
-        const downWall = (cells[pacPosition + width].classList.contains('wall') === false)
-
-        //Set pac-Man moving
-        switch (e.keyCode) {
-          case 37:
-            if (leftWall) {
-              pacPosition -= 1  
-              movement = true
-            }
-            break
-          case 38:
-            if (upWall) {
-              pacPosition -= width
-              movement = true
-            }
-            break
-          case 39:
-            if (rightWall) {
-              pacPosition += 1
-              movement = true
-            }
-            break
-          case 40:
-            if (downWall) {
-              pacPosition += width
-              movement = true
-            }
-            break
-        }
-        cells[pacPosition].classList.add('player')
-
-        //Stop pac-man at walls
-        switch (e.keyCode) {
-          case 37: if (!leftWall) clearInterval(pacIntervalId)
-            break
-          case 38: if (!upWall) clearInterval(pacIntervalId)
-            break
-          case 39: if (!rightWall) clearInterval(pacIntervalId)
-            break
-          case 40: if (!downWall) clearInterval(pacIntervalId)
-            break
-        }
-      }, 150)
+      getWalls()
+      if ((e.keyCode === 37 && !leftWall) || (e.keyCode === 38 && !upWall) || (e.keyCode === 39 && !rightWall) || (e.keyCode === 40 && !downWall)) {
+        clearInterval(pacIntervalId)
+        pacIntervalId = setInterval(() => {
+          cells[pacPosition].classList.remove('player')
+          getWalls()
+          //Set pac-Man moving
+          switch (e.keyCode) {
+            case 37:
+              if (pacPosition === 144) pacPosition = 161
+              if (!leftWall) pacPosition -= 1
+              break
+            case 38:
+              if (!upWall) pacPosition -= width
+              break
+            case 39:
+              if (pacPosition === 161) pacPosition = 144
+              if (!rightWall) pacPosition += 1
+              break
+            case 40:
+              if (!downWall) pacPosition += width
+              break
+          }
+          console.log(totalScore)
+          eatPip()
+          winLose()
+          cells[pacPosition].classList.add('player')
+        }, 100)
+      }
     }
   })
 
