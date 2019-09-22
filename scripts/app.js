@@ -1,6 +1,11 @@
 document.addEventListener('DOMContentLoaded', () => {
   const width = 18
   const grid = document.querySelector('.grid')
+  const cells = []
+  //keyCodes for left, up, right, down
+  const validKey = [37, 38, 39, 40]
+
+  let gameStarted = false
 
   //========================
   //== Creating the board ==
@@ -21,27 +26,49 @@ document.addEventListener('DOMContentLoaded', () => {
       278, 279, 280, 281, 282, 283, 284, 285, 287, 288, 305, 306, 307, 308,
       309, 310, 311, 312, 313, 314, 315, 316, 317, 318, 319, 320, 321, 322, 323]
 
+  //This array holds the non-wall locations that shouldn't have pips
   const noPipLocations =
-      [19,34,115,116,117,118,144,145,146,147,148,149,150,151,154,155,156,157,
-        158,159,160,161,115,116,117,118,169,170,171,172,133,136,289,151,154,304,205]
-
-  const cells = []
-
- 
+    [19, 34, 115, 116, 117, 118, 144, 145, 146, 147, 148, 149, 150, 151, 154, 155, 156, 157,
+      158, 159, 160, 161, 115, 116, 117, 118, 169, 170, 171, 172, 133, 136, 289, 151, 154, 304, 205]
 
   let pacIntervalId = 0
-  const validKey = [37, 38, 39, 40]
+  let inkyIntervalId = 0
+  // let pacIntervalId = 0
+  // let pacIntervalId = 0
+  // let pacIntervalId = 0
 
   let leftWall = false
   let upWall = false
   let rightWall = false
   let downWall = false
   let pacPosition = 205
-  let ghostPositions = {
+  // let inkyPosition = 169
+
+  let inkyUpWall = false
+
+
+  const ghostPositions = {
     inky: 169,
+    inkyX: 0,
+    inkyY: 0,
+    inkyDir: 'up',
+    inkycorner: false,
+    inkyJunction: false,
     pinky: 170,
     blinky: 171,
     clyde: 172
+  }
+  const inkyWalls = {
+    Left: false,
+    Up: false,
+    Right: false,
+    Down: false
+  }
+  const inkyGhosts = {
+    Left: false,
+    Up: false,
+    Right: false,
+    Down: false
   }
   let totalScore = 0
   let pipsRemaining = 109
@@ -65,18 +92,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function addPips() {
     cells.forEach((element, index) => {
-      //console.log(wallLocations.includes(index))
       if (!noPipLocations.includes(index) && !wallLocations.includes(index))
         element.classList.add('pip')
     })
   }
 
-  function addGhosts() {
-    cells[ghostPositions.inky].classList.add('inky')
-    cells[ghostPositions.blinky].classList.add('blinky')
-    cells[ghostPositions.pinky].classList.add('pinky')
-    cells[ghostPositions.clyde].classList.add('clyde')
+  function addPLayer() {
+    cells[pacPosition].classList.add('player')
   }
+
+  function addGhosts() {
+    cells[ghostPositions.inky].classList.add('ghost', 'inky')
+    cells[ghostPositions.blinky].classList.add('ghost', 'blinky')
+    cells[ghostPositions.pinky].classList.add('ghost', 'pinky')
+    cells[ghostPositions.clyde].classList.add('ghost', 'clyde')
+  }
+
 
   function getWalls() {
     leftWall = (cells[pacPosition - 1].classList.contains('wall'))
@@ -85,8 +116,33 @@ document.addEventListener('DOMContentLoaded', () => {
     downWall = (cells[pacPosition + width].classList.contains('wall'))
   }
 
+  function getInky() {
+    inkyWalls.Left = (cells[ghostPositions.inky - 1].classList.contains('wall'))
+    inkyWalls.up = (cells[ghostPositions.inky - width].classList.contains('wall'))
+    inkyWalls.Right = (cells[ghostPositions.inky + 1].classList.contains('wall'))
+    inkyWalls.Down = (cells[ghostPositions.inky + width].classList.contains('wall'))
+    inkyGhosts.Left = (cells[ghostPositions.inky - 1].classList.contains('wall'))
+    inkyGhosts.Up = (cells[ghostPositions.inky - width].classList.contains('wall'))
+    inkyGhosts.Right = (cells[ghostPositions.inky + 1].classList.contains('wall'))
+    inkyGhosts.Down = (cells[ghostPositions.inky + width].classList.contains('wall'))
+  }
+
+
+
+  function getGhostPositions() {
+    ghostPositions.inkyX = (ghostPositions.inky % width)
+    ghostPositions.inkyY = (Math.floor(ghostPositions.inky / width))
+    let x = 0
+    if (inkyWalls.left === true) x++
+    if (inkyWalls.up === true) x++
+    if (inkyWalls.right === true) x++
+    if (inkyWalls.down === true) x++
+    if (x === 2) ghostPositions.inkycorner = true
+    if (x > 2) ghostPositions.inkyJunction = true
+  }
+
   function eatPip() {
-    if (cells[pacPosition].classList.contains('pip')){
+    if (cells[pacPosition].classList.contains('pip')) {
       cells[pacPosition].classList.remove('pip')
       totalScore += 10
       pipsRemaining -= 1
@@ -94,10 +150,10 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function winLose() {
-    console.log(ghostPositions.values)
     if (pipsRemaining === 0) {
       console.log('you have won')
       clearInterval(pacIntervalId)
+      clearInterval(inkyIntervalId)
     }
     if (Object.values(ghostPositions).includes(pacPosition)) {
       console.log('you have lost')
@@ -105,13 +161,51 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-
   buildGrid()
   addWalls()
   addPips()
   addGhosts()
-  //adding the player on to the grid in starting position
-  cells[pacPosition].classList.add('player')
+  addPLayer()
+  getInky()
+  console.log(inkyWalls.up)
+  console.log(leftWall)
+  console.log(cells[pacPosition - 1].classList.contains('wall'))
+  console.log(cells[ghostPositions.inky - width].classList.contains('wall'))
+
+  //==================//
+  // Ghost movements  //
+  //==================//
+
+  function inkyMovement() {
+    getInky()
+    getGhostPositions()
+    inkyIntervalId = setInterval(() => {
+      cells[ghostPositions.inky].classList.remove('ghost', 'inky')
+
+      switch (ghostPositions.inkyDir) {
+        case 'up':
+          getInky()
+          console.log(!inkyWalls.up)
+          if (!inkyWalls.up) ghostPositions.inky -= width
+          // if (inkyJunction)
+          break
+        // case 38:
+        //   if (!upWall) pacPosition -= width
+        //   break
+        // case 39:
+        //   if (pacPosition === 161) pacPosition = 144
+        //   if (!rightWall) pacPosition += 1
+        //   break
+        // case 40:
+        //   if (!downWall) pacPosition += width
+        //   break
+
+      }
+      cells[ghostPositions.inky].classList.add('ghost', 'inky')
+      getInky()
+    }, 150)
+  }
+
 
   //==================//
   // Pac-Man movements//
@@ -119,6 +213,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.addEventListener('keyup', (e) => {
     if (validKey.includes(e.keyCode)) {
+      if (!gameStarted) inkyMovement(); gameStarted = true
       getWalls()
       if ((e.keyCode === 37 && !leftWall) || (e.keyCode === 38 && !upWall) || (e.keyCode === 39 && !rightWall) || (e.keyCode === 40 && !downWall)) {
         clearInterval(pacIntervalId)
@@ -142,10 +237,9 @@ document.addEventListener('DOMContentLoaded', () => {
               if (!downWall) pacPosition += width
               break
           }
-          console.log(totalScore)
           eatPip()
           winLose()
-          cells[pacPosition].classList.add('player')
+          addPLayer()
         }, 100)
       }
     }
