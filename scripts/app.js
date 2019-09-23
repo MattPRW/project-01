@@ -31,9 +31,11 @@ document.addEventListener('DOMContentLoaded', () => {
     [19, 34, 115, 116, 117, 118, 144, 145, 146, 147, 148, 149, 150, 151, 154, 155, 156, 157,
       158, 159, 160, 161, 115, 116, 117, 118, 169, 170, 171, 172, 133, 136, 289, 151, 154, 304, 205]
 
-  let pacIntervalId = 0
-  let inkyIntervalId = 0
-  // let pacIntervalId = 0
+  let pacIntervalId 
+  let inkyIntervalId 
+  let pinkyIntervalId 
+  let blinkyIntervalId 
+  let clydeIntervalId 
   // let pacIntervalId = 0
   // let pacIntervalId = 0
 
@@ -44,32 +46,63 @@ document.addEventListener('DOMContentLoaded', () => {
   let pacPosition = 205
   // let inkyPosition = 169
 
-  let inkyUpWall = false
 
+  // const ghostTargets = {
+  //   inky: 1,
+  //   pinky: 16,
+  //   blinky: 307,
+  //   clyde: 322
+  // }
 
   const ghostPositions = {
     inky: 169,
-    inkyX: 0,
-    inkyY: 0,
     inkyDir: 'up',
-    inkycorner: false,
     inkyJunction: false,
     pinky: 170,
+    pinkyDir: 'left',
+    pinkyJunction: false,
     blinky: 171,
-    clyde: 172
+    blinkyDir: 'right',
+    blinkyJunction: false,
+    clyde: 172,
+    clydeDir: 'up',
+    clydeJunction: false
   }
   const inkyWalls = {
-    Left: false,
-    Up: false,
-    Right: false,
-    Down: false
+    left: false,
+    up: false,
+    right: false,
+    down: false
   }
-  const inkyGhosts = {
-    Left: false,
-    Up: false,
-    Right: false,
-    Down: false
+
+  const pinkyWalls = {
+    left: false,
+    up: false,
+    right: false,
+    down: false
   }
+
+  const blinkyWalls = {
+    left: false,
+    up: false,
+    right: false,
+    down: false
+  }
+
+  const clydeWalls = {
+    left: false,
+    up: false,
+    right: false,
+    down: false
+  }
+
+  // const inkyGhosts = {
+  //   left: false,
+  //   up: false,
+  //   right: false,
+  //   down: false
+  // }
+
   let totalScore = 0
   let pipsRemaining = 109
 
@@ -117,29 +150,81 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function getInky() {
-    inkyWalls.Left = (cells[ghostPositions.inky - 1].classList.contains('wall'))
+    inkyWalls.left = (cells[ghostPositions.inky - 1].classList.contains('wall'))
     inkyWalls.up = (cells[ghostPositions.inky - width].classList.contains('wall'))
-    inkyWalls.Right = (cells[ghostPositions.inky + 1].classList.contains('wall'))
-    inkyWalls.Down = (cells[ghostPositions.inky + width].classList.contains('wall'))
-    inkyGhosts.Left = (cells[ghostPositions.inky - 1].classList.contains('wall'))
-    inkyGhosts.Up = (cells[ghostPositions.inky - width].classList.contains('wall'))
-    inkyGhosts.Right = (cells[ghostPositions.inky + 1].classList.contains('wall'))
-    inkyGhosts.Down = (cells[ghostPositions.inky + width].classList.contains('wall'))
+    inkyWalls.right = (cells[ghostPositions.inky + 1].classList.contains('wall'))
+    inkyWalls.down = (cells[ghostPositions.inky + width].classList.contains('wall'))
+  }
+
+  function getPinky() {
+    pinkyWalls.left = (cells[ghostPositions.pinky - 1].classList.contains('wall'))
+    pinkyWalls.up = (cells[ghostPositions.pinky - width].classList.contains('wall'))
+    pinkyWalls.right = (cells[ghostPositions.pinky + 1].classList.contains('wall'))
+    pinkyWalls.down = (cells[ghostPositions.pinky + width].classList.contains('wall'))
+  }
+
+  function getBlinky() {
+    blinkyWalls.left = (cells[ghostPositions.blinky - 1].classList.contains('wall'))
+    blinkyWalls.up = (cells[ghostPositions.blinky - width].classList.contains('wall'))
+    blinkyWalls.right = (cells[ghostPositions.blinky + 1].classList.contains('wall'))
+    blinkyWalls.down = (cells[ghostPositions.blinky + width].classList.contains('wall'))
+  }
+
+  function getClyde() {
+    clydeWalls.left = (cells[ghostPositions.clyde - 1].classList.contains('wall'))
+    clydeWalls.up = (cells[ghostPositions.clyde - width].classList.contains('wall'))
+    clydeWalls.right = (cells[ghostPositions.clyde + 1].classList.contains('wall'))
+    clydeWalls.down = (cells[ghostPositions.clyde + width].classList.contains('wall'))
   }
 
 
-
-  function getGhostPositions() {
-    ghostPositions.inkyX = (ghostPositions.inky % width)
-    ghostPositions.inkyY = (Math.floor(ghostPositions.inky / width))
+  function getInkyPositions() {
     let x = 0
-    if (inkyWalls.left === true) x++
-    if (inkyWalls.up === true) x++
-    if (inkyWalls.right === true) x++
-    if (inkyWalls.down === true) x++
-    if (x === 2) ghostPositions.inkycorner = true
-    if (x > 2) ghostPositions.inkyJunction = true
+    if (!inkyWalls.left) x++
+    if (!inkyWalls.up) x++
+    if (!inkyWalls.right) x++
+    if (!inkyWalls.down) x++
+    if (x === 3) ghostPositions.inkyJunction = 3
+    else if (x === 4) ghostPositions.inkyJunction = 4
+    else ghostPositions.inkyJunction = 0
   }
+
+  function getPinkyPositions() {
+    let x = 0
+    if (!pinkyWalls.left) x++
+    if (!pinkyWalls.up) x++
+    if (!pinkyWalls.right) x++
+    if (!pinkyWalls.down) x++
+    if (x === 3) ghostPositions.pinkyJunction = 3
+    else if (x === 4) ghostPositions.pinkyJunction = 4
+    else ghostPositions.pinkyJunction = 0
+  }
+
+  function getBlinkyPositions() {
+    let x = 0
+    if (!blinkyWalls.left) x++
+    if (!blinkyWalls.up) x++
+    if (!blinkyWalls.right) x++
+    if (!blinkyWalls.down) x++
+    if (x === 3) ghostPositions.blinkyJunction = 3
+    else if (x === 4) ghostPositions.blinkyJunction = 4
+    else ghostPositions.blinkyJunction = 0
+  }
+
+  function getClydePositions() {
+    let x = 0
+    if (!clydeWalls.left) x++
+    if (!clydeWalls.up) x++
+    if (!clydeWalls.right) x++
+    if (!clydeWalls.down) x++
+    if (x === 3) ghostPositions.clydeJunction = 3
+    else if (x === 4) ghostPositions.clydeJunction = 4
+    else ghostPositions.clydeJunction = 0
+  }
+
+
+
+
 
   function eatPip() {
     if (cells[pacPosition].classList.contains('pip')) {
@@ -154,10 +239,17 @@ document.addEventListener('DOMContentLoaded', () => {
       console.log('you have won')
       clearInterval(pacIntervalId)
       clearInterval(inkyIntervalId)
+      clearInterval(pinkyIntervalId)
+      clearInterval(blinkyIntervalId)
+      clearInterval(clydeIntervalId)
     }
     if (Object.values(ghostPositions).includes(pacPosition)) {
       console.log('you have lost')
       clearInterval(pacIntervalId)
+      clearInterval(inkyIntervalId)
+      clearInterval(pinkyIntervalId)
+      clearInterval(blinkyIntervalId)
+      clearInterval(clydeIntervalId)
     }
   }
 
@@ -166,54 +258,236 @@ document.addEventListener('DOMContentLoaded', () => {
   addPips()
   addGhosts()
   addPLayer()
-  getInky()
-  console.log(inkyWalls.up)
-  console.log(leftWall)
-  console.log(cells[pacPosition - 1].classList.contains('wall'))
-  console.log(cells[ghostPositions.inky - width].classList.contains('wall'))
 
   //==================//
   // Ghost movements  //
   //==================//
 
-  function inkyMovement() {
-    getInky()
-    getGhostPositions()
-    inkyIntervalId = setInterval(() => {
-      cells[ghostPositions.inky].classList.remove('ghost', 'inky')
-
-      switch (ghostPositions.inkyDir) {
-        case 'up':
-          getInky()
-          console.log(!inkyWalls.up)
-          if (!inkyWalls.up) ghostPositions.inky -= width
-          // if (inkyJunction)
-          break
-        // case 38:
-        //   if (!upWall) pacPosition -= width
-        //   break
-        // case 39:
-        //   if (pacPosition === 161) pacPosition = 144
-        //   if (!rightWall) pacPosition += 1
-        //   break
-        // case 40:
-        //   if (!downWall) pacPosition += width
-        //   break
-
-      }
-      cells[ghostPositions.inky].classList.add('ghost', 'inky')
-      getInky()
-    }, 150)
+  function checkInkyJunction() {
+    if (ghostPositions.inkyJunction === 3 && Math.floor(Math.random() * 2) === 0) return '3a'
+    if (ghostPositions.inkyJunction === 3 && Math.floor(Math.random() * 2) === 1) return '3b'
+    if (ghostPositions.inkyJunction === 4 && Math.floor(Math.random() * 3) === 0) return '4a'
+    if (ghostPositions.inkyJunction === 4 && Math.floor(Math.random() * 3) === 1) return '4b'
+    if (ghostPositions.inkyJunction === 4 && Math.floor(Math.random() * 3) === 2) return '4c'
   }
 
+  function checkPinkyJunction() {
+    if (ghostPositions.pinkyJunction === 3 && Math.floor(Math.random() * 2) === 0) return '3a'
+    if (ghostPositions.pinkyJunction === 3 && Math.floor(Math.random() * 2) === 1) return '3b'
+    if (ghostPositions.pinkyJunction === 4 && Math.floor(Math.random() * 3) === 0) return '4a'
+    if (ghostPositions.pinkyJunction === 4 && Math.floor(Math.random() * 3) === 2) return '4b'
+    if (ghostPositions.pinkyJunction === 4 && Math.floor(Math.random() * 3) === 3) return '4c'
+  }
+
+  function checkBlinkyJunction() {
+    if (ghostPositions.blinkyJunction === 3 && Math.floor(Math.random() * 2) === 0) return '3a'
+    if (ghostPositions.blinkyJunction === 3 && Math.floor(Math.random() * 2) === 1) return '3b'
+    if (ghostPositions.blinkyJunction === 4 && Math.floor(Math.random() * 3) === 0) return '4a'
+    if (ghostPositions.blinkyJunction === 4 && Math.floor(Math.random() * 3) === 2) return '4b'
+    if (ghostPositions.blinkyJunction === 4 && Math.floor(Math.random() * 3) === 3) return '4c'
+  }
+
+  function checkClydeJunction() {
+    if (ghostPositions.clydeJunction === 3 && Math.floor(Math.random() * 2) === 0) return '3a'
+    if (ghostPositions.clydeJunction === 3 && Math.floor(Math.random() * 2) === 1) return '3b'
+    if (ghostPositions.clydeJunction === 4 && Math.floor(Math.random() * 3) === 0) return '4a'
+    if (ghostPositions.clydeJunction === 4 && Math.floor(Math.random() * 3) === 2) return '4b'
+    if (ghostPositions.clydeJunction === 4 && Math.floor(Math.random() * 3) === 3) return '4c'
+  }
+
+  function inkyMovement() {
+    inkyIntervalId = setInterval(() => {
+      getInky()
+      getInkyPositions()
+      cells[ghostPositions.inky].classList.remove('ghost', 'inky')
+      switch (ghostPositions.inkyDir) {
+        case 'left':
+          if (ghostPositions.inky === 144) ghostPositions.inky = 161
+          else if (checkInkyJunction() === '3a' || checkInkyJunction() === '4a') ghostPositions.inkyDir = 'up'
+          else if (checkInkyJunction() === '3b' || checkInkyJunction() === '4b') ghostPositions.inkyDir = 'down'
+          else if (checkInkyJunction() === '4c') ghostPositions.inkyDir = 'right'
+          else if (!inkyWalls.left) ghostPositions.inky -= 1
+          else if (!inkyWalls.up) ghostPositions.inkyDir = 'up'
+          else if (!inkyWalls.down) ghostPositions.inkyDir = 'down'
+          break
+        case 'up':
+          if (checkInkyJunction() === '3a' || checkInkyJunction() === '4a') ghostPositions.inkyDir = 'left'
+          else if (checkInkyJunction() === '3b' || checkInkyJunction() === '4b') ghostPositions.inkyDir = 'right'
+          else if (checkInkyJunction() === '4c') ghostPositions.inkyDir = 'down'
+          else if (!inkyWalls.up) ghostPositions.inky -= width
+          else if (!inkyWalls.right) ghostPositions.inkyDir = 'right'
+          else if (!inkyWalls.left) ghostPositions.inkyDir = 'left'
+          break
+        case 'right':
+          if (ghostPositions.inky === 161) ghostPositions.inky = 144
+          else if (checkInkyJunction() === '3a' || checkInkyJunction() === '4a') ghostPositions.inkyDir = 'down'
+          else if (checkInkyJunction() === '3b' || checkInkyJunction() === '4b') ghostPositions.inkyDir = 'up'
+          else if (checkInkyJunction() === '4c') ghostPositions.inkyDir = 'up'
+          else if (!inkyWalls.right) ghostPositions.inky += 1
+          else if (!inkyWalls.down) ghostPositions.inkyDir = 'down'
+          else if (!inkyWalls.up) ghostPositions.inkyDir = 'up'
+          break
+        case 'down':
+          if (checkInkyJunction() === '3a' || checkInkyJunction() === '4a') ghostPositions.inkyDir = 'right'
+          else if (checkInkyJunction() === '3b' || checkInkyJunction() === '4b') ghostPositions.inkyDir = 'left'
+          else if (checkInkyJunction() === '4c') ghostPositions.inkyDir = 'left'
+          else if (!inkyWalls.down) ghostPositions.inky += width
+          else if (!inkyWalls.left) ghostPositions.inkyDir = 'left'
+          else if (!inkyWalls.right) ghostPositions.inkyDir = 'right'
+          break
+      }
+      cells[ghostPositions.inky].classList.add('ghost', 'inky')
+    }, 200)
+  }
+
+  function pinkyMovement() {
+    pinkyIntervalId = setInterval(() => {
+      getPinky()
+      getPinkyPositions()
+      cells[ghostPositions.pinky].classList.remove('ghost', 'pinky')
+      switch (ghostPositions.pinkyDir) {
+        case 'left':
+          if (ghostPositions.pinky === 144) ghostPositions.pinky = 161
+          else if (checkPinkyJunction() === '3a' || checkPinkyJunction() === '4a') ghostPositions.pinkyDir = 'up'
+          else if (checkPinkyJunction() === '3b' || checkPinkyJunction() === '4b') ghostPositions.pinkyDir = 'down'
+          else if (checkPinkyJunction() === '4c') ghostPositions.pinkyDir = 'right'
+          else if (!pinkyWalls.left) ghostPositions.pinky -= 1
+          else if (!pinkyWalls.up) ghostPositions.pinkyDir = 'up'
+          else if (!pinkyWalls.down) ghostPositions.pinkyDir = 'down'
+          break
+        case 'up':
+          if (checkPinkyJunction() === '3a' || checkPinkyJunction() === '4a') ghostPositions.pinkyDir = 'left'
+          else if (checkPinkyJunction() === '3b' || checkPinkyJunction() === '4b') ghostPositions.pinkyDir = 'right'
+          else if (checkPinkyJunction() === '4c') ghostPositions.pinkyDir = 'down'
+          else if (!pinkyWalls.up) ghostPositions.pinky -= width
+          else if (!pinkyWalls.right) ghostPositions.pinkyDir = 'right'
+          else if (!pinkyWalls.left) ghostPositions.pinkyDir = 'left'
+          break
+        case 'right':
+          if (ghostPositions.pinky === 161) ghostPositions.pinky = 144
+          else if (checkPinkyJunction() === '3a' || checkPinkyJunction() === '4a') ghostPositions.pinkyDir = 'down'
+          else if (checkPinkyJunction() === '3b' || checkPinkyJunction() === '4b') ghostPositions.pinkyDir = 'up'
+          else if (checkPinkyJunction() === '4c') ghostPositions.pinkyDir = 'up'
+          else if (!pinkyWalls.right) ghostPositions.pinky += 1
+          else if (!pinkyWalls.down) ghostPositions.pinkyDir = 'down'
+          else if (!pinkyWalls.up) ghostPositions.pinkyDir = 'up'
+          break
+        case 'down':
+          if (checkPinkyJunction() === '3a' || checkPinkyJunction() === '4a') ghostPositions.pinkyDir = 'right'
+          else if (checkPinkyJunction() === '3b' || checkPinkyJunction() === '4b') ghostPositions.pinkyDir = 'left'
+          else if (checkPinkyJunction() === '4c') ghostPositions.pinkyDir = 'left'
+          else if (!pinkyWalls.down) ghostPositions.pinky += width
+          else if (!pinkyWalls.left) ghostPositions.pinkyDir = 'left'
+          else if (!pinkyWalls.right) ghostPositions.pinkyDir = 'right'
+          break
+      }
+      cells[ghostPositions.pinky].classList.add('ghost', 'pinky')
+    }, 200)
+  }
+
+  function blinkyMovement() {
+    blinkyIntervalId = setInterval(() => {
+      getBlinky()
+      getBlinkyPositions()
+      cells[ghostPositions.blinky].classList.remove('ghost', 'blinky')
+      switch (ghostPositions.blinkyDir) {
+        case 'left':
+          if (ghostPositions.blinky === 144) ghostPositions.blinky = 161
+          else if (checkBlinkyJunction() === '3a' || checkBlinkyJunction() === '4a') ghostPositions.blinkyDir = 'up'
+          else if (checkBlinkyJunction() === '3b' || checkBlinkyJunction() === '4b') ghostPositions.blinkyDir = 'down'
+          else if (checkBlinkyJunction() === '4c') ghostPositions.blinkyDir = 'right'
+          else if (!blinkyWalls.left) ghostPositions.blinky -= 1
+          else if (!blinkyWalls.up) ghostPositions.blinkyDir = 'up'
+          else if (!blinkyWalls.down) ghostPositions.blinkyDir = 'down'
+          break
+        case 'up':
+          if (checkBlinkyJunction() === '3a' || checkPinkyJunction() === '4a') ghostPositions.blinkyDir = 'left'
+          else if (checkBlinkyJunction() === '3b' || checkPinkyJunction() === '4b') ghostPositions.blinkyDir = 'right'
+          else if (checkBlinkyJunction() === '4c') ghostPositions.blinkyDir = 'down'
+          else if (!blinkyWalls.up) ghostPositions.blinky -= width
+          else if (!blinkyWalls.right) ghostPositions.blinkyDir = 'right'
+          else if (!blinkyWalls.left) ghostPositions.blinkyDir = 'left'
+          break
+        case 'right':
+          if (ghostPositions.blinky === 161) ghostPositions.blinky = 144
+          else if (checkBlinkyJunction() === '3a' || checkPinkyJunction() === '4a') ghostPositions.blinkyDir = 'down'
+          else if (checkBlinkyJunction() === '3b' || checkPinkyJunction() === '4b') ghostPositions.blinkyDir = 'up'
+          else if (checkBlinkyJunction() === '4c') ghostPositions.blinkyDir = 'up'
+          else if (!blinkyWalls.right) ghostPositions.blinky += 1
+          else if (!blinkyWalls.down) ghostPositions.blinkyDir = 'down'
+          else if (!blinkyWalls.up) ghostPositions.blinkyDir = 'up'
+          break
+        case 'down':
+          if (checkPinkyJunction() === '3a' || checkPinkyJunction() === '4a') ghostPositions.blinkyDir = 'right'
+          else if (checkBlinkyJunction() === '3b' || checkPinkyJunction() === '4b') ghostPositions.blinkyDir = 'left'
+          else if (checkBlinkyJunction() === '4c') ghostPositions.blinkyDir = 'left'
+          else if (!blinkyWalls.down) ghostPositions.blinky += width
+          else if (!blinkyWalls.left) ghostPositions.blinkyDir = 'left'
+          else if (!blinkyWalls.right) ghostPositions.blinkyDir = 'right'
+          break
+      }
+      cells[ghostPositions.blinky].classList.add('ghost', 'blinky')
+    }, 200)
+  }
+
+  function clydeMovement() {
+    clydeIntervalId = setInterval(() => {
+      getClyde()
+      getClydePositions()
+      cells[ghostPositions.clyde].classList.remove('ghost', 'clyde')
+      switch (ghostPositions.clydeDir) {
+        case 'left':
+          if (ghostPositions.clyde === 144) ghostPositions.clyde = 161
+          else if (checkClydeJunction() === '3a' || checkClydeJunction() === '4a') ghostPositions.clydeDir = 'up'
+          else if (checkClydeJunction() === '3b' || checkClydeJunction() === '4b') ghostPositions.clydeDir = 'down'
+          else if (checkClydeJunction() === '4c') ghostPositions.clydeDir = 'right'
+          else if (!clydeWalls.left) ghostPositions.clyde -= 1
+          else if (!clydeWalls.up) ghostPositions.clydeDir = 'up'
+          else if (!clydeWalls.down) ghostPositions.clydeDir = 'down'
+          break
+        case 'up':
+          if (checkClydeJunction() === '3a' || checkClydeJunction() === '4a') ghostPositions.clydeDir = 'left'
+          else if (checkClydeJunction() === '3b' || checkClydeJunction() === '4b') ghostPositions.clydeDir = 'right'
+          else if (checkClydeJunction() === '4c') ghostPositions.clydeDir = 'down'
+          else if (!clydeWalls.up) ghostPositions.clyde -= width
+          else if (!clydeWalls.right) ghostPositions.clydeDir = 'right'
+          else if (!clydeWalls.left) ghostPositions.clydeDir = 'left'
+          break
+        case 'right':
+          if (ghostPositions.clyde === 161) ghostPositions.clyde = 144
+          else if (checkClydeJunction() === '3a' || checkClydeJunction() === '4a') ghostPositions.clydeDir = 'down'
+          else if (checkClydeJunction() === '3b' || checkClydeJunction() === '4b') ghostPositions.clydeDir = 'up'
+          else if (checkClydeJunction() === '4c') ghostPositions.clydeDir = 'up'
+          else if (!clydeWalls.right) ghostPositions.clyde += 1
+          else if (!clydeWalls.down) ghostPositions.clydeDir = 'down'
+          else if (!clydeWalls.up) ghostPositions.clydeDir = 'up'
+          break
+        case 'down':
+          if (checkClydeJunction() === '3a' || checkClydeJunction() === '4a') ghostPositions.clydeDir = 'right'
+          else if (checkClydeJunction() === '3b' || checkClydeJunction() === '4b') ghostPositions.clydeDir = 'left'
+          else if (checkClydeJunction() === '4c') ghostPositions.clydeDir = 'left'
+          else if (!clydeWalls.down) ghostPositions.clyde += width
+          else if (!clydeWalls.left) ghostPositions.clydeDir = 'left'
+          else if (!clydeWalls.right) ghostPositions.clydeDir = 'right'
+          break
+      }
+      cells[ghostPositions.clyde].classList.add('ghost', 'clyde')
+    }, 200)
+  }
 
   //==================//
   // Pac-Man movements//
   //==================//
 
-  document.addEventListener('keyup', (e) => {
+  document.addEventListener('keydown', (e) => {
     if (validKey.includes(e.keyCode)) {
-      if (!gameStarted) inkyMovement(); gameStarted = true
+      if (!gameStarted) {
+        inkyMovement() 
+        pinkyMovement()
+        blinkyMovement()
+        clydeMovement()
+        gameStarted = true
+      }
       getWalls()
       if ((e.keyCode === 37 && !leftWall) || (e.keyCode === 38 && !upWall) || (e.keyCode === 39 && !rightWall) || (e.keyCode === 40 && !downWall)) {
         clearInterval(pacIntervalId)
@@ -244,18 +518,6 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
   })
-
-
-
-
-
-
-
-
-
-
-
-
 
 })
 
