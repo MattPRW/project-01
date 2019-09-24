@@ -8,6 +8,7 @@ body {
   height: 100vh;
   justify-content: center;
   margin: 0;
+  background-color: black
 }
 
 .grid {
@@ -41,6 +42,11 @@ body {
 
 .pip {
   background-color: chartreuse;
+  border-radius: 100%;
+}
+
+.powerpill {
+  background-color: gold;
   border-radius: 100%;
 }
 

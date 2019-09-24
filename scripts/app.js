@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const validKey = [37, 38, 39, 40]
 
   let gameStarted = false
+  let powerMode = false
 
   //========================
   //== Creating the board ==
@@ -31,29 +32,28 @@ document.addEventListener('DOMContentLoaded', () => {
     [19, 34, 115, 116, 117, 118, 144, 145, 146, 147, 148, 149, 150, 151, 154, 155, 156, 157,
       158, 159, 160, 161, 115, 116, 117, 118, 169, 170, 171, 172, 133, 136, 289, 151, 154, 304, 205]
 
-  let pacIntervalId 
-  let inkyIntervalId 
-  let pinkyIntervalId 
-  let blinkyIntervalId 
-  let clydeIntervalId 
-  // let pacIntervalId = 0
-  // let pacIntervalId = 0
+  //This holds the location of the power pills
+  const powerPillLocations = [19, 34, 289, 304]
 
+  // Intervals for timing
+  let pacIntervalId
+  let inkyIntervalId
+  let pinkyIntervalId
+  let blinkyIntervalId
+  let clydeIntervalId
+  let inkyInterval = 200
+  let pinkyInterval = 200
+  let blinkyInterval = 200
+  let clydeInterval = 200
+
+  //wall postions relating to pac-man
   let leftWall = false
   let upWall = false
   let rightWall = false
   let downWall = false
   let pacPosition = 205
-  // let inkyPosition = 169
 
-
-  // const ghostTargets = {
-  //   inky: 1,
-  //   pinky: 16,
-  //   blinky: 307,
-  //   clyde: 322
-  // }
-
+  //Positions, direction of movement and juction of ghosts
   const ghostPositions = {
     inky: 169,
     inkyDir: 'up',
@@ -68,6 +68,8 @@ document.addEventListener('DOMContentLoaded', () => {
     clydeDir: 'up',
     clydeJunction: false
   }
+
+  //wall positions relating to inky
   const inkyWalls = {
     left: false,
     up: false,
@@ -75,6 +77,7 @@ document.addEventListener('DOMContentLoaded', () => {
     down: false
   }
 
+  //wall positions relating to pinky
   const pinkyWalls = {
     left: false,
     up: false,
@@ -82,6 +85,7 @@ document.addEventListener('DOMContentLoaded', () => {
     down: false
   }
 
+  //wall positions relating to blinky
   const blinkyWalls = {
     left: false,
     up: false,
@@ -89,19 +93,13 @@ document.addEventListener('DOMContentLoaded', () => {
     down: false
   }
 
+  //wall positions relating to clyde
   const clydeWalls = {
     left: false,
     up: false,
     right: false,
     down: false
   }
-
-  // const inkyGhosts = {
-  //   left: false,
-  //   up: false,
-  //   right: false,
-  //   down: false
-  // }
 
   let totalScore = 0
   let pipsRemaining = 109
@@ -130,6 +128,13 @@ document.addEventListener('DOMContentLoaded', () => {
     })
   }
 
+  function addPowerPills() {
+    cells.forEach((element, index) => {
+      if (powerPillLocations.includes(index))
+        element.classList.add('powerpill')
+    })
+  }
+
   function addPLayer() {
     cells[pacPosition].classList.add('player')
   }
@@ -140,7 +145,6 @@ document.addEventListener('DOMContentLoaded', () => {
     cells[ghostPositions.pinky].classList.add('ghost', 'pinky')
     cells[ghostPositions.clyde].classList.add('ghost', 'clyde')
   }
-
 
   function getWalls() {
     leftWall = (cells[pacPosition - 1].classList.contains('wall'))
@@ -222,10 +226,6 @@ document.addEventListener('DOMContentLoaded', () => {
     else ghostPositions.clydeJunction = 0
   }
 
-
-
-
-
   function eatPip() {
     if (cells[pacPosition].classList.contains('pip')) {
       cells[pacPosition].classList.remove('pip')
@@ -233,6 +233,61 @@ document.addEventListener('DOMContentLoaded', () => {
       pipsRemaining -= 1
     }
   }
+
+  function eatPowerPill() {
+    if (cells[pacPosition].classList.contains('powerpill')) {
+      cells[pacPosition].classList.remove('powerpill')
+      totalScore += 50
+      powerMode = true
+      powerModeOn()
+      inkyMovement()
+      pinkyMovement()
+      blinkyMovement()
+      clydeMovement()
+    }
+  }
+
+  function powerModeOn() {
+    clearInterval(inkyIntervalId)
+    inkyInterval = 300
+    clearInterval(pinkyIntervalId)
+    pinkyInterval = 300
+    clearInterval(blinkyIntervalId)
+    blinkyInterval = 300
+    clearInterval(clydeIntervalId)
+    clydeInterval = 300
+    setInterval(() => {
+      if (ghostPositions.inky === pacPosition) {
+        cells[ghostPositions.inky].classList.remove('inky', 'ghost')
+        ghostPositions.inky = 169
+        clearInterval(inkyIntervalId)
+        inkyInterval = 300
+        inkyMovement()
+      }
+      if (ghostPositions.pinky === pacPosition) {
+        cells[ghostPositions.pinky].classList.remove('pinky', 'ghost')
+        ghostPositions.pinky = 170
+        clearInterval(pinkyIntervalId)
+        pinkyInterval = 300
+        pinkyMovement()
+      }
+      if (ghostPositions.blinky === pacPosition) {
+        cells[ghostPositions.blinky].classList.remove('blinky', 'ghost')
+        ghostPositions.blinky = 172
+        clearInterval(blinkyIntervalId)
+        blinkyInterval = 300
+        blinkyMovement()
+      }
+      if (ghostPositions.clyde === pacPosition) {
+        cells[ghostPositions.clyde].classList.remove('clyde', 'ghost')
+        ghostPositions.clyde = 171
+        clearInterval(clydeIntervalId)
+        clydeInterval = 300
+        clydeMovement()
+      }
+    }, 10)
+  }
+
 
   function winLose() {
     if (pipsRemaining === 0) {
@@ -243,7 +298,7 @@ document.addEventListener('DOMContentLoaded', () => {
       clearInterval(blinkyIntervalId)
       clearInterval(clydeIntervalId)
     }
-    if (Object.values(ghostPositions).includes(pacPosition)) {
+    if (Object.values(ghostPositions).includes(pacPosition) && (!powerMode)) {
       console.log('you have lost')
       clearInterval(pacIntervalId)
       clearInterval(inkyIntervalId)
@@ -257,6 +312,7 @@ document.addEventListener('DOMContentLoaded', () => {
   addWalls()
   addPips()
   addGhosts()
+  addPowerPills()
   addPLayer()
 
   //==================//
@@ -337,7 +393,7 @@ document.addEventListener('DOMContentLoaded', () => {
           break
       }
       cells[ghostPositions.inky].classList.add('ghost', 'inky')
-    }, 200)
+    }, inkyInterval)
   }
 
   function pinkyMovement() {
@@ -382,7 +438,7 @@ document.addEventListener('DOMContentLoaded', () => {
           break
       }
       cells[ghostPositions.pinky].classList.add('ghost', 'pinky')
-    }, 200)
+    }, pinkyInterval)
   }
 
   function blinkyMovement() {
@@ -427,7 +483,7 @@ document.addEventListener('DOMContentLoaded', () => {
           break
       }
       cells[ghostPositions.blinky].classList.add('ghost', 'blinky')
-    }, 200)
+    }, blinkyInterval)
   }
 
   function clydeMovement() {
@@ -472,7 +528,7 @@ document.addEventListener('DOMContentLoaded', () => {
           break
       }
       cells[ghostPositions.clyde].classList.add('ghost', 'clyde')
-    }, 200)
+    }, clydeInterval)
   }
 
   //==================//
@@ -482,7 +538,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('keydown', (e) => {
     if (validKey.includes(e.keyCode)) {
       if (!gameStarted) {
-        inkyMovement() 
+        inkyMovement()
         pinkyMovement()
         blinkyMovement()
         clydeMovement()
@@ -512,6 +568,7 @@ document.addEventListener('DOMContentLoaded', () => {
               break
           }
           eatPip()
+          eatPowerPill()
           winLose()
           addPLayer()
         }, 100)
