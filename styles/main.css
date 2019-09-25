@@ -148,15 +148,21 @@ p{
 
 
 .inky{
-  background-color: lightblue
+  background-image: url(../assets/inky.gif);
+  background-repeat: no-repeat;
+  background-size: contain;
 }
 
 .pinky{
- background-color: pink
+  background-image: url(../assets/pinky.gif);
+  background-repeat: no-repeat;
+  background-size: contain;
 }
 
 .blinky{
-background-color: red
+  background-image: url(../assets/blinky.gif);
+  background-repeat: no-repeat;
+  background-size: contain;
 }
 
 .clyde{
@@ -169,7 +175,9 @@ background-color: red
 }
 
 .dead-ghost{
-  background-color: blue;
+  background-image: url(../assets/blue-ghost.gif);
+  background-repeat: no-repeat;
+  background-size: contain;
 }
 
 .died{
