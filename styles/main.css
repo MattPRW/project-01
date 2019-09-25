@@ -8,7 +8,8 @@ body {
   height: 100vh;
   justify-content: center;
   margin: 0;
-  background-color: black
+  background-color: black;
+  flex-direction: column;
 }
 
 .grid {
@@ -18,8 +19,10 @@ body {
   flex-wrap: wrap;
   height: 100%;
   justify-content: center;
-  max-height: 600px;
-  max-width: 600px;
+  min-height: 500px;
+  min-width: 500px;
+  max-height: 500px;
+  max-width: 500px;
   background-color: black;
 }
 
@@ -31,24 +34,118 @@ body {
 }
 
 .grid div.player {
-  background-color:yellow;
-  border-radius: 100%;
+  background-image: url(../assets/PacMan.gif);
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position-x: 0;
+  background-position-y: 0;
 }
+
+h1{
+  color: green;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 4rem;
+}
+
+p{
+  color: green;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 1.5rem;
+}
+
+.bottom{
+  display: flex;
+  justify-content: center;
+}
+
+.bottom-wrapper{
+  width: 500px;
+  display:flex;
+  justify-content: space-between;
+  
+}
+
+.score{
+  display: flex;
+  justify-content: flex-start;
+  margin: 0;
+}
+
+.lives-wrapper{
+  display: flex;
+  height: 72px;
+  align-self: flex-end;
+  margin: 0;
+}
+
+.lives{
+  width: 25px;
+  height: 25px;
+  align-self: center;
+  background-image: url(../assets/PacMan.gif);
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position-x: 0;
+  background-position-y: 0;
+}
+
+
+
+
+
+/* .grid div.playerLeft {
+  background-image: url(../assets/PacMan.gif);
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position-x: 0;
+  background-position-y: 0;
+}
+
+.grid div.playerUp {
+  background-image: url(../assets/PacMan.gif);
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position-x: 0;
+  background-position-y: 0;
+  transform: rotate(90deg)
+}
+
+.grid div.playerRight {
+  background-image: url(../assets/PacMan.gif);
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position-x: 0;
+  background-position-y: 0;
+  transform: rotate(180deg)
+}
+
+.grid div.playerDown {
+  background-image: url(../assets/PacMan.gif);
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position-x: 0;
+  background-position-y: 0;
+  transform: rotate(270deg)
+} */
 
 .wall {
   background-color:black;
-  border: solid 1px blue 
+  border: solid 1px green;
+  border-radius: 25%;
 }
 
 .pip {
-  background-color: chartreuse;
-  border-radius: 100%;
+  background-image: url(../assets/pip.png);
+  background-repeat: no-repeat;
+  background-size: contain;
 }
 
 .powerpill {
-  background-color: gold;
-  border-radius: 100%;
+  background-image: url(../assets/powerpill.png);
+  background-repeat: no-repeat;
+  background-size: contain;
 }
+
 
 .inky{
   background-color: lightblue
@@ -63,5 +160,28 @@ background-color: red
 }
 
 .clyde{
-background-color: orange
+  background-image: url(../assets/clyde.gif);
+  /* background-size: 30px; */
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position-x: 0;
+  background-position-y: 0;
 }
+
+.dead-ghost{
+  background-color: blue;
+}
+
+.died{
+  background-image: url(../assets/died.gif);
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position-x: 0;
+  background-position-y: 0;
+}
+
+.hidden{
+  display: none
+}
+
+

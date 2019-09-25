@@ -7,6 +7,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let gameStarted = false
   let powerMode = false
+  let gameOver = false
+  let lives = 3
 
   //========================
   //== Creating the board ==
@@ -41,10 +43,11 @@ document.addEventListener('DOMContentLoaded', () => {
   let pinkyIntervalId
   let blinkyIntervalId
   let clydeIntervalId
-  let inkyInterval = 200
-  let pinkyInterval = 200
-  let blinkyInterval = 200
-  let clydeInterval = 200
+  let inkyInterval = 100
+  let pinkyInterval = 100
+  let blinkyInterval = 100
+  let clydeInterval = 100
+  let ghostState = 'ghost'
 
   //wall postions relating to pac-man
   let leftWall = false
@@ -135,6 +138,7 @@ document.addEventListener('DOMContentLoaded', () => {
     })
   }
 
+
   function addPLayer() {
     cells[pacPosition].classList.add('player')
   }
@@ -180,7 +184,6 @@ document.addEventListener('DOMContentLoaded', () => {
     clydeWalls.right = (cells[ghostPositions.clyde + 1].classList.contains('wall'))
     clydeWalls.down = (cells[ghostPositions.clyde + width].classList.contains('wall'))
   }
-
 
   function getInkyPositions() {
     let x = 0
@@ -234,6 +237,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  // let ghostPowerTimer
+
   function eatPowerPill() {
     if (cells[pacPosition].classList.contains('powerpill')) {
       cells[pacPosition].classList.remove('powerpill')
@@ -245,9 +250,23 @@ document.addEventListener('DOMContentLoaded', () => {
       blinkyMovement()
       clydeMovement()
     }
+    if (powerMode === true) {
+      setTimeout(() => {
+        cells[ghostPositions.inky].classList.remove(ghostState)
+        cells[ghostPositions.pinky].classList.remove(ghostState)
+        cells[ghostPositions.blinky].classList.remove(ghostState)
+        cells[ghostPositions.clyde].classList.remove(ghostState)
+        ghostState = 'ghost'
+        powerMode = false
+        clearInterval(powerIntervalId)
+      }, 6000)
+    }
   }
 
+  let powerIntervalId
+
   function powerModeOn() {
+    ghostState = 'dead-ghost'
     clearInterval(inkyIntervalId)
     inkyInterval = 300
     clearInterval(pinkyIntervalId)
@@ -256,30 +275,34 @@ document.addEventListener('DOMContentLoaded', () => {
     blinkyInterval = 300
     clearInterval(clydeIntervalId)
     clydeInterval = 300
-    setInterval(() => {
+    powerIntervalId = setInterval(() => {
       if (ghostPositions.inky === pacPosition) {
-        cells[ghostPositions.inky].classList.remove('inky', 'ghost')
+        cells[ghostPositions.inky].classList.remove('inky', ghostState)
+        totalScore += 100
         ghostPositions.inky = 169
         clearInterval(inkyIntervalId)
         inkyInterval = 300
         inkyMovement()
       }
       if (ghostPositions.pinky === pacPosition) {
-        cells[ghostPositions.pinky].classList.remove('pinky', 'ghost')
+        cells[ghostPositions.pinky].classList.remove('pinky', ghostState)
+        totalScore += 100
         ghostPositions.pinky = 170
         clearInterval(pinkyIntervalId)
         pinkyInterval = 300
         pinkyMovement()
       }
       if (ghostPositions.blinky === pacPosition) {
-        cells[ghostPositions.blinky].classList.remove('blinky', 'ghost')
+        cells[ghostPositions.blinky].classList.remove('blinky', ghostState)
+        totalScore += 100
         ghostPositions.blinky = 172
         clearInterval(blinkyIntervalId)
         blinkyInterval = 300
         blinkyMovement()
       }
       if (ghostPositions.clyde === pacPosition) {
-        cells[ghostPositions.clyde].classList.remove('clyde', 'ghost')
+        cells[ghostPositions.clyde].classList.remove('clyde', ghostState)
+        totalScore += 100
         ghostPositions.clyde = 171
         clearInterval(clydeIntervalId)
         clydeInterval = 300
@@ -289,22 +312,76 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
 
+  if (ghostPositions.pinky === pacPosition) {
+    cells[ghostPositions.pinky].classList.remove('pinky', ghostState)
+    totalScore += 100
+    ghostPositions.pinky = 170
+    clearInterval(pinkyIntervalId)
+    pinkyInterval = 300
+    pinkyMovement()
+  }
+
   function winLose() {
+    //win game
     if (pipsRemaining === 0) {
-      console.log('you have won')
+      gameOver = true
       clearInterval(pacIntervalId)
       clearInterval(inkyIntervalId)
       clearInterval(pinkyIntervalId)
       clearInterval(blinkyIntervalId)
       clearInterval(clydeIntervalId)
     }
-    if (Object.values(ghostPositions).includes(pacPosition) && (!powerMode)) {
-      console.log('you have lost')
+    //lose life
+    if (Object.values(ghostPositions).includes(pacPosition) && (!powerMode) && lives > 0) {
+      gameOver = true
+      clearInterval(pacIntervalId)
+      //wait 1 sec
+      setTimeout(() => {
+        lives--
+        gameOver = false
+        cells[pacPosition].classList = ''
+        // cells[pacPosition].classList.add('died')
+        
+        switch (lives) {
+          case 2: 
+            // cells[pacPosition].classList.add('died') 
+            pacPosition = 205         
+            document.querySelector('.life3').classList.remove('lives')
+            break
+          case 1:
+            // cells[pacPosition].classList.add('died')
+            pacPosition = 205
+            document.querySelector('.life2').classList.remove('lives')
+            break
+          case 0:
+            // cells[pacPosition].classList.add('died')
+            pacPosition = 205
+            document.querySelector('.life1').classList.remove('lives')
+            break
+        }
+        addPLayer()
+      }, 1000)
+    }
+    //game over
+    if (Object.values(ghostPositions).includes(pacPosition) && (!powerMode) && lives === 0) {
+     
+      clearInterval(pacIntervalId)
+      cells[pacPosition].classList = ''
+      // cells[pacPosition].classList.add('died')
+      gameOver = true
       clearInterval(pacIntervalId)
       clearInterval(inkyIntervalId)
       clearInterval(pinkyIntervalId)
       clearInterval(blinkyIntervalId)
       clearInterval(clydeIntervalId)
+      ///wait 1 sec
+      setTimeout(() => {
+        grid.classList.add('hidden')
+        document.querySelector('h1').style.color = 'red'
+        document.querySelector('h1').innerHTML = 'Game Over'
+      }, 1000)
+
+
     }
   }
 
@@ -355,7 +432,7 @@ document.addEventListener('DOMContentLoaded', () => {
     inkyIntervalId = setInterval(() => {
       getInky()
       getInkyPositions()
-      cells[ghostPositions.inky].classList.remove('ghost', 'inky')
+      cells[ghostPositions.inky].classList.remove(ghostState, 'inky')
       switch (ghostPositions.inkyDir) {
         case 'left':
           if (ghostPositions.inky === 144) ghostPositions.inky = 161
@@ -392,7 +469,7 @@ document.addEventListener('DOMContentLoaded', () => {
           else if (!inkyWalls.right) ghostPositions.inkyDir = 'right'
           break
       }
-      cells[ghostPositions.inky].classList.add('ghost', 'inky')
+      cells[ghostPositions.inky].classList.add('inky', ghostState)
     }, inkyInterval)
   }
 
@@ -400,7 +477,7 @@ document.addEventListener('DOMContentLoaded', () => {
     pinkyIntervalId = setInterval(() => {
       getPinky()
       getPinkyPositions()
-      cells[ghostPositions.pinky].classList.remove('ghost', 'pinky')
+      cells[ghostPositions.pinky].classList.remove(ghostState, 'pinky')
       switch (ghostPositions.pinkyDir) {
         case 'left':
           if (ghostPositions.pinky === 144) ghostPositions.pinky = 161
@@ -437,7 +514,7 @@ document.addEventListener('DOMContentLoaded', () => {
           else if (!pinkyWalls.right) ghostPositions.pinkyDir = 'right'
           break
       }
-      cells[ghostPositions.pinky].classList.add('ghost', 'pinky')
+      cells[ghostPositions.pinky].classList.add('pinky', ghostState)
     }, pinkyInterval)
   }
 
@@ -445,7 +522,7 @@ document.addEventListener('DOMContentLoaded', () => {
     blinkyIntervalId = setInterval(() => {
       getBlinky()
       getBlinkyPositions()
-      cells[ghostPositions.blinky].classList.remove('ghost', 'blinky')
+      cells[ghostPositions.blinky].classList.remove(ghostState, 'blinky')
       switch (ghostPositions.blinkyDir) {
         case 'left':
           if (ghostPositions.blinky === 144) ghostPositions.blinky = 161
@@ -482,7 +559,7 @@ document.addEventListener('DOMContentLoaded', () => {
           else if (!blinkyWalls.right) ghostPositions.blinkyDir = 'right'
           break
       }
-      cells[ghostPositions.blinky].classList.add('ghost', 'blinky')
+      cells[ghostPositions.blinky].classList.add('blinky', ghostState)
     }, blinkyInterval)
   }
 
@@ -490,7 +567,7 @@ document.addEventListener('DOMContentLoaded', () => {
     clydeIntervalId = setInterval(() => {
       getClyde()
       getClydePositions()
-      cells[ghostPositions.clyde].classList.remove('ghost', 'clyde')
+      cells[ghostPositions.clyde].classList.remove(ghostState, 'clyde')
       switch (ghostPositions.clydeDir) {
         case 'left':
           if (ghostPositions.clyde === 144) ghostPositions.clyde = 161
@@ -527,7 +604,7 @@ document.addEventListener('DOMContentLoaded', () => {
           else if (!clydeWalls.right) ghostPositions.clydeDir = 'right'
           break
       }
-      cells[ghostPositions.clyde].classList.add('ghost', 'clyde')
+      cells[ghostPositions.clyde].classList.add('clyde', ghostState)
     }, clydeInterval)
   }
 
@@ -535,8 +612,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // Pac-Man movements//
   //==================//
 
-  document.addEventListener('keydown', (e) => {
-    if (validKey.includes(e.keyCode)) {
+  document.addEventListener('keyup', (e) => {
+    if (validKey.includes(e.keyCode) && (!gameOver)) {
       if (!gameStarted) {
         inkyMovement()
         pinkyMovement()
@@ -568,14 +645,17 @@ document.addEventListener('DOMContentLoaded', () => {
               break
           }
           eatPip()
-          eatPowerPill()
+          if (!powerMode) {
+            eatPowerPill()
+          }
+
           winLose()
           addPLayer()
+          document.querySelector('.score-counter').innerHTML = `Score: ${totalScore}`
         }, 100)
       }
     }
   })
-
 })
 
 
