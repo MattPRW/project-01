@@ -91,42 +91,21 @@ p{
 
 
 
-
-
-/* .grid div.playerLeft {
-  background-image: url(../assets/PacMan.gif);
-  background-repeat: no-repeat;
-  background-size: contain;
-  background-position-x: 0;
-  background-position-y: 0;
-}
-
-.grid div.playerUp {
-  background-image: url(../assets/PacMan.gif);
-  background-repeat: no-repeat;
-  background-size: contain;
-  background-position-x: 0;
-  background-position-y: 0;
-  transform: rotate(90deg)
-}
-
-.grid div.playerRight {
-  background-image: url(../assets/PacMan.gif);
-  background-repeat: no-repeat;
-  background-size: contain;
-  background-position-x: 0;
-  background-position-y: 0;
+.left {
   transform: rotate(180deg)
 }
 
-.grid div.playerDown {
-  background-image: url(../assets/PacMan.gif);
-  background-repeat: no-repeat;
-  background-size: contain;
-  background-position-x: 0;
-  background-position-y: 0;
+.up {
   transform: rotate(270deg)
-} */
+}
+
+.right {
+  transform: rotate(0deg)
+}
+
+.down {
+  transform: rotate(90deg)
+}
 
 .wall {
   background-color:black;

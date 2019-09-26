@@ -138,7 +138,6 @@ document.addEventListener('DOMContentLoaded', () => {
     })
   }
 
-
   function addPLayer() {
     cells[pacPosition].classList.add('player')
   }
@@ -237,6 +236,27 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  function clearGhostTimers(){
+    clearInterval(powerIntervalId)
+    clearInterval(inkyIntervalId)
+    clearInterval(pinkyIntervalId)
+    clearInterval(blinkyIntervalId)
+    clearInterval(clydeIntervalId)
+  }
+
+  function setGhostTimers(timer){
+    inkyInterval = timer
+    pinkyInterval = timer
+    blinkyInterval = timer
+    clydeInterval = timer
+  }
+
+  function startghostMovement(){
+    inkyMovement()
+    pinkyMovement()
+    blinkyMovement()
+    clydeMovement()
+  }
   // let ghostPowerTimer
 
   function eatPowerPill() {
@@ -245,10 +265,7 @@ document.addEventListener('DOMContentLoaded', () => {
       totalScore += 50
       powerMode = true
       powerModeOn()
-      inkyMovement()
-      pinkyMovement()
-      blinkyMovement()
-      clydeMovement()
+      startghostMovement()
     }
     if (powerMode === true) {
       setTimeout(() => {
@@ -258,23 +275,21 @@ document.addEventListener('DOMContentLoaded', () => {
         cells[ghostPositions.clyde].classList.remove(ghostState)
         ghostState = 'ghost'
         powerMode = false
-        clearInterval(powerIntervalId)
+        clearGhostTimers()
+        setGhostTimers(100)
+        startghostMovement()
       }, 6000)
     }
   }
 
+
   let powerIntervalId
+
 
   function powerModeOn() {
     ghostState = 'dead-ghost'
-    clearInterval(inkyIntervalId)
-    inkyInterval = 300
-    clearInterval(pinkyIntervalId)
-    pinkyInterval = 300
-    clearInterval(blinkyIntervalId)
-    blinkyInterval = 300
-    clearInterval(clydeIntervalId)
-    clydeInterval = 300
+    clearGhostTimers()
+    setGhostTimers(300)
     powerIntervalId = setInterval(() => {
       if (ghostPositions.inky === pacPosition) {
         cells[ghostPositions.inky].classList.remove('inky', ghostState)
@@ -311,28 +326,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 10)
   }
 
-
-  if (ghostPositions.pinky === pacPosition) {
-    cells[ghostPositions.pinky].classList.remove('pinky', ghostState)
-    totalScore += 100
-    ghostPositions.pinky = 170
-    clearInterval(pinkyIntervalId)
-    pinkyInterval = 300
-    pinkyMovement()
-  }
-
   function winLose() {
     //win game
     if (pipsRemaining === 0) {
       gameOver = true
       clearInterval(pacIntervalId)
-      clearInterval(inkyIntervalId)
-      clearInterval(pinkyIntervalId)
-      clearInterval(blinkyIntervalId)
-      clearInterval(clydeIntervalId)
+      clearGhostTimers()
       grid.classList.add('hidden')
-      document.querySelector('.win-reset').classList.remove('hidden')
       document.querySelector('h1').innerHTML = 'You Win!!!'
+      document.querySelector('.win-reset').classList.remove('hidden')
+
     }
     //lose life
     if (Object.values(ghostPositions).includes(pacPosition) && (!powerMode) && lives > 0) {
@@ -371,10 +374,7 @@ document.addEventListener('DOMContentLoaded', () => {
       // cells[pacPosition].classList.add('died')
       gameOver = true
       clearInterval(pacIntervalId)
-      clearInterval(inkyIntervalId)
-      clearInterval(pinkyIntervalId)
-      clearInterval(blinkyIntervalId)
-      clearInterval(clydeIntervalId)
+      clearGhostTimers()
       ///wait 1 sec
       setTimeout(() => {
         grid.classList.add('hidden')
@@ -613,20 +613,28 @@ document.addEventListener('DOMContentLoaded', () => {
   //==================//
 
   gameStarted = false
-
   document.addEventListener('keyup', (e) => {
     console.log(gameStarted)
 
     if ((e.keyCode === 32) && (!gameStarted)) {
       document.querySelector('.press-space').classList.add('hidden')
       document.querySelector('.big-pic').classList.add('hidden')
-      document.querySelector('.grid').classList.remove('hidden')
-      document.querySelector('.bottom-wrapper').classList.remove('hidden')
-      inkyMovement()
-      pinkyMovement()
-      blinkyMovement()
-      clydeMovement()
-      gameStarted = true
+      document.querySelector('h1').classList.add('hidden')
+      document.querySelector('.countdown').classList.remove('hidden')
+      setTimeout(() => {
+        document.querySelector('.countdown').innerHTML = '<p>2</p>'
+        setTimeout(() => {
+          document.querySelector('.countdown').innerHTML = '<p>1</p>'
+          setTimeout(() => {
+            document.querySelector('h1').classList.remove('hidden')
+            document.querySelector('.grid').classList.remove('hidden')
+            document.querySelector('.bottom-wrapper').classList.remove('hidden')
+            document.querySelector('.countdown').classList.add('hidden')
+            startghostMovement()
+            gameStarted = true
+          }, 1000)    
+        }, 1000)
+      }, 1000)
     }
   })
 
@@ -649,23 +657,27 @@ document.addEventListener('DOMContentLoaded', () => {
       if ((e.keyCode === 37 && !leftWall) || (e.keyCode === 38 && !upWall) || (e.keyCode === 39 && !rightWall) || (e.keyCode === 40 && !downWall)) {
         clearInterval(pacIntervalId)
         pacIntervalId = setInterval(() => {
-          cells[pacPosition].classList.remove('player')
+          cells[pacPosition].classList = ''
           getWalls()
           //Set pac-Man moving
           switch (e.keyCode) {
             case 37:
               if (pacPosition === 144) pacPosition = 161
               if (!leftWall) pacPosition -= 1
+              cells[pacPosition].classList.add('player', 'left')
               break
             case 38:
               if (!upWall) pacPosition -= width
+              cells[pacPosition].classList.add('player', 'up')
               break
             case 39:
               if (pacPosition === 161) pacPosition = 144
               if (!rightWall) pacPosition += 1
+              cells[pacPosition].classList.add('player', 'right')
               break
             case 40:
               if (!downWall) pacPosition += width
+              cells[pacPosition].classList.add('player', 'down')
               break
           }
           eatPip()
@@ -674,7 +686,7 @@ document.addEventListener('DOMContentLoaded', () => {
           }
 
           winLose()
-          addPLayer()
+          // addPLayer()
           document.querySelector('.score-counter').innerHTML = `Score: ${totalScore}`
         }, 100)
       }
