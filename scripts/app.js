@@ -340,8 +340,6 @@ document.addEventListener('DOMContentLoaded', () => {
         lives--
         gameOver = false
         cells[pacPosition].classList = ''
-        // cells[pacPosition].classList.add('died')
-        
         switch (lives) {
           case 2: 
             // cells[pacPosition].classList.add('died') 
@@ -380,8 +378,6 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelector('h1').style.color = 'red'
         document.querySelector('h1').innerHTML = 'Game Over'
       }, 1000)
-
-
     }
   }
 
@@ -609,18 +605,33 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   //==================//
+  // Start screen     //
+  //==================//
+
+  gameStarted = false
+
+  document.addEventListener('keyup', (e) => {
+    console.log(gameStarted)
+
+    if ((e.keyCode === 32) && (!gameStarted)) {
+      document.querySelector('.press-space').classList.add('hidden')
+      document.querySelector('.big-pic').classList.add('hidden')
+      document.querySelector('.grid').classList.remove('hidden')
+      document.querySelector('.bottom-wrapper').classList.remove('hidden')
+      inkyMovement()
+      pinkyMovement()
+      blinkyMovement()
+      clydeMovement()
+      gameStarted = true
+    }
+  })
+
+  //==================//
   // Pac-Man movements//
   //==================//
 
   document.addEventListener('keyup', (e) => {
     if (validKey.includes(e.keyCode) && (!gameOver)) {
-      if (!gameStarted) {
-        inkyMovement()
-        pinkyMovement()
-        blinkyMovement()
-        clydeMovement()
-        gameStarted = true
-      }
       getWalls()
       if ((e.keyCode === 37 && !leftWall) || (e.keyCode === 38 && !upWall) || (e.keyCode === 39 && !rightWall) || (e.keyCode === 40 && !downWall)) {
         clearInterval(pacIntervalId)
@@ -657,5 +668,3 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   })
 })
-
-
