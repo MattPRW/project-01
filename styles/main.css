@@ -130,7 +130,7 @@ p{
 
 .wall {
   background-color:black;
-  border: solid 1px green;
+  border: solid green 1px;
   border-radius: 25%;
 }
 

@@ -330,6 +330,9 @@ document.addEventListener('DOMContentLoaded', () => {
       clearInterval(pinkyIntervalId)
       clearInterval(blinkyIntervalId)
       clearInterval(clydeIntervalId)
+      grid.classList.add('hidden')
+      document.querySelector('.win-reset').classList.remove('hidden')
+      document.querySelector('h1').innerHTML = 'You Win!!!'
     }
     //lose life
     if (Object.values(ghostPositions).includes(pacPosition) && (!powerMode) && lives > 0) {
@@ -375,6 +378,7 @@ document.addEventListener('DOMContentLoaded', () => {
       ///wait 1 sec
       setTimeout(() => {
         grid.classList.add('hidden')
+        document.querySelector('.win-reset').classList.remove('hidden')
         document.querySelector('h1').style.color = 'red'
         document.querySelector('h1').innerHTML = 'Game Over'
       }, 1000)
@@ -623,6 +627,15 @@ document.addEventListener('DOMContentLoaded', () => {
       blinkyMovement()
       clydeMovement()
       gameStarted = true
+    }
+  })
+
+  //==================//
+  // Return to Start  //
+  //==================//
+  document.addEventListener('keyup', (e) => {
+    if ((e.keyCode === 32) && (gameOver)) {
+      location.reload()
     }
   })
 
