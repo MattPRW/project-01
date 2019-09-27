@@ -10,6 +10,16 @@ document.addEventListener('DOMContentLoaded', () => {
   let gameOver = false
   let lives = 3
 
+  //these hold the audio clips
+  const chomp = new Audio('assets/pacman_chomp.wav')
+  const death = new Audio('assets/pacman_death.wav')
+  const eatGhost = new Audio('assets/pacman_eatghost.wav')
+  const eatPill = new Audio('assets/pacman_eatpill.wav')
+  const countDownSound = new Audio('assets/pacman_countdown.wav')
+  const winSound = new Audio('assets/pacman_win.wav')
+  const gameOverSound = new Audio('assets/pacman_gameover.wav')
+  // const intermission = new Audio('assets/pacman_intermission.wav')
+
   //========================
   //== Creating the board ==
   //========================
@@ -233,6 +243,7 @@ document.addEventListener('DOMContentLoaded', () => {
       cells[pacPosition].classList.remove('pip')
       totalScore += 10
       pipsRemaining -= 1
+      chomp.play()
     }
   }
 
@@ -262,6 +273,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function eatPowerPill() {
     if (cells[pacPosition].classList.contains('powerpill')) {
       cells[pacPosition].classList.remove('powerpill')
+      eatPill.play()
       totalScore += 50
       powerMode = true
       powerModeOn()
@@ -282,7 +294,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-
   let powerIntervalId
 
 
@@ -292,6 +303,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setGhostTimers(300)
     powerIntervalId = setInterval(() => {
       if (ghostPositions.inky === pacPosition) {
+        eatGhost.play()
         cells[ghostPositions.inky].classList.remove('inky', ghostState)
         totalScore += 100
         ghostPositions.inky = 169
@@ -300,6 +312,7 @@ document.addEventListener('DOMContentLoaded', () => {
         inkyMovement()
       }
       if (ghostPositions.pinky === pacPosition) {
+        eatGhost.play()
         cells[ghostPositions.pinky].classList.remove('pinky', ghostState)
         totalScore += 100
         ghostPositions.pinky = 170
@@ -308,6 +321,7 @@ document.addEventListener('DOMContentLoaded', () => {
         pinkyMovement()
       }
       if (ghostPositions.blinky === pacPosition) {
+        eatGhost.play()
         cells[ghostPositions.blinky].classList.remove('blinky', ghostState)
         totalScore += 100
         ghostPositions.blinky = 172
@@ -316,6 +330,7 @@ document.addEventListener('DOMContentLoaded', () => {
         blinkyMovement()
       }
       if (ghostPositions.clyde === pacPosition) {
+        eatGhost.play()
         cells[ghostPositions.clyde].classList.remove('clyde', ghostState)
         totalScore += 100
         ghostPositions.clyde = 171
@@ -332,13 +347,16 @@ document.addEventListener('DOMContentLoaded', () => {
       gameOver = true
       clearInterval(pacIntervalId)
       clearGhostTimers()
-      grid.classList.add('hidden')
-      document.querySelector('h1').innerHTML = 'You Win!!!'
-      document.querySelector('.win-reset').classList.remove('hidden')
-
+      setTimeout(() => {
+        winSound.play()
+        grid.classList.add('hidden')
+        document.querySelector('h1').innerHTML = 'You Win!!!'
+        document.querySelector('.win-reset').classList.remove('hidden')
+      }, 1000)
     }
     //lose life
     if (Object.values(ghostPositions).includes(pacPosition) && (!powerMode) && lives > 0) {
+      death.play()
       gameOver = true
       clearInterval(pacIntervalId)
       //wait 1 sec
@@ -368,7 +386,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     //game over
     if (Object.values(ghostPositions).includes(pacPosition) && (!powerMode) && lives === 0) {
-     
+      death.play()
       clearInterval(pacIntervalId)
       cells[pacPosition].classList = ''
       // cells[pacPosition].classList.add('died')
@@ -377,6 +395,7 @@ document.addEventListener('DOMContentLoaded', () => {
       clearGhostTimers()
       ///wait 1 sec
       setTimeout(() => {
+        gameOverSound.play()
         grid.classList.add('hidden')
         document.querySelector('.win-reset').classList.remove('hidden')
         document.querySelector('h1').style.color = 'red'
@@ -612,11 +631,15 @@ document.addEventListener('DOMContentLoaded', () => {
   // Start screen     //
   //==================//
 
+  let countDown = false
+
   gameStarted = false
   document.addEventListener('keyup', (e) => {
     console.log(gameStarted)
 
-    if ((e.keyCode === 32) && (!gameStarted)) {
+    if ((e.keyCode === 32) && (!gameStarted) && countDown === false) {
+      countDown = true
+      countDownSound.play()
       document.querySelector('.press-space').classList.add('hidden')
       document.querySelector('.big-pic').classList.add('hidden')
       document.querySelector('h1').classList.add('hidden')
@@ -657,7 +680,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if ((e.keyCode === 37 && !leftWall) || (e.keyCode === 38 && !upWall) || (e.keyCode === 39 && !rightWall) || (e.keyCode === 40 && !downWall)) {
         clearInterval(pacIntervalId)
         pacIntervalId = setInterval(() => {
-          cells[pacPosition].classList = ''
+          cells[pacPosition].classList.remove('left', 'up', 'right', 'down', 'player')
           getWalls()
           //Set pac-Man moving
           switch (e.keyCode) {
